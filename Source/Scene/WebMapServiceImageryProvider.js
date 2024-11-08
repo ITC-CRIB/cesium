@@ -45,6 +45,7 @@ import UrlTemplateImageryProvider from "./UrlTemplateImageryProvider.js";
  *                          an array, each element in the array is a subdomain.
  * @property {Clock} [clock] A Clock instance that is used when determining the value for the time dimension. Required when `times` is specified.
  * @property {TimeIntervalCollection} [times] TimeIntervalCollection with its data property being an object containing time dynamic dimension and their values.
+ * @property {Resource|String} [getFeatureInfoUrl] The getFeatureInfo URL of the WMS service. If the property is not defined then we use the property value of url.
  */
 
 /**
@@ -180,9 +181,14 @@ function WebMapServiceImageryProvider(options) {
    */
   this.defaultMagnificationFilter = undefined;
 
+  this._getFeatureInfoUrl = defaultValue(
+    options.getFeatureInfoUrl,
+    options.url
+  );
+
   var resource = Resource.createIfNeeded(options.url);
 
-  var pickFeatureResource = resource.clone();
+  var pickFeatureResource = Resource.createIfNeeded(this._getFeatureInfoUrl);
 
   resource.setQueryParameters(
     WebMapServiceImageryProvider.DefaultParameters,
@@ -561,6 +567,18 @@ Object.defineProperties(WebMapServiceImageryProvider.prototype, {
     },
     set: function (value) {
       this._timeDynamicImagery.times = value;
+    },
+  },
+
+  /**
+   * Gets the getFeatureInfo URL of the WMS server.
+   * @memberof WebMapServiceImageryProvider.prototype
+   * @type {Resource|String}
+   * @readonly
+   */
+  getFeatureInfoUrl: {
+    get: function () {
+      return this._getFeatureInfoUrl;
     },
   },
 });
